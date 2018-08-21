@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <input type="text" v-model="sender" />
+        <input type="text" v-model="rec" />
+        <input type="text" v-model="text" />
+        <button @click="sendMessage">Send</button>
+        <button @click="closet">Close</button>
+
+        <li v-for="me in message">{{me}}</li>
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.js"></script>
+    <script>
+        wt = new WebSocket('ws://localhost:8080/ws');
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                message: [],
+                text: '',
+                sender: '',
+                rec: '',
+
+            },
+            mounted: function () {
+                wt.onmessage = function (e) {
+                    vm.message.push(e.data);
+                    console.log(e);
+                };
+
+               
+                wt.onerror = function (error) {
+                    console.log('WebSocket Error: ' + error);
+                };
+                wt.onclose = function (e) {
+                    console.log('bye');
+                };
+
+            },
+            methods: {
+                sendMessage: function () {
+
+                    var obj = { sender: vm.sender, recipient: vm.rec, content: vm.text };
+                    var myJSON = JSON.stringify(obj);
+                    wt.send(myJSON);
+                },
+                closet: function () {
+                    console.log('');
+                    wt.close();
+                },
+
+            }
+
+        });
+    </script>
+</body>
+
+</html>
